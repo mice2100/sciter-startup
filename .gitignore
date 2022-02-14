@@ -1,0 +1,6 @@
+build
+CMakeFiles
+CMakeCache*
+bin
+resource.h
+info.plist

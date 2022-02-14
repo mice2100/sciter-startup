@@ -1,0 +1,2 @@
+. sciter-startup
+
