@@ -149,17 +149,6 @@ INSTALL(
     FRAMEWORK DESTINATION ${RUNTIMEDIR}
 )
 
-# if(WIN32)
-#     install(
-#         FILES ${DLLLIST}
-#         DESTINATION ${RUNTIMEDIR})
-# endif()
-
-
-# install(
-#     FILES ${DLLLIST}
-#     DESTINATION ${DLLDIR}
-# )
 install(CODE "set(DLLLIST \"${DLLLIST}\")
     set(DLLDIR \"${DLLDIR}\")
     ")
