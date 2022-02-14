@@ -51,7 +51,7 @@ endif()
 
 # SET(LIBLIST pthread spdlog::spdlog_header_only freeimage)
 
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED True)
 
 SET(SRCLIST src/AppMain.cpp)
