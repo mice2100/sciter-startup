@@ -2,9 +2,9 @@
 
 This is a template project to create a sciter.js (www.sciter.com) backend application.
 
-The sciter official samples are provided in VisualStudio project on windows and CODE project on macOS.
-Becaused of the heavy size of VStudio and Code, my routine workspace are based on VSCODE+CMAKE+command line compiler.
-If you happen like the lightweigth solution like me, this is what you need.
+The sciter official samples are provided in Visual Studio project on windows and xcode project on macOS.
+Becaused of the heavy size of VStudio and xcode, my routine workspace are based on VSCODE+CMAKE+command line compiler.
+If you happen prefer lightweigth solution like me, this might help.
 
 If you prefer VS or Code, this can still helps you to maintain the project unified, becase anyway, you can 
 use cmake to generate the projects easily.
