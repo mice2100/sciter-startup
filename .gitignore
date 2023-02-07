@@ -1,6 +1,3 @@
-build
-CMakeFiles
-CMakeCache*
+build*
 bin
-resource.h
-info.plist
+vendors

@@ -25,3 +25,9 @@ use cmake to generate the projects easily.
 ## path on your computer, or specify msys2 or brew.
 
 - This is extracted from my original project so, if there's anything wrong, please PR or leave me a message.
+
+V2.0
+Feb 6, 2023
+1. efactor folder structure
+2. Use python to recreate vendor folder(mkvendor.py), package resource(packres.py) and build
+3. Use vcpkg and clang to compile(much faster than mingw), you can switch to mingw in bd.py
