@@ -1,6 +1,7 @@
-#include "stdafx.h"
+#include "sciter-x-api.h"
+#include "sciter-x-window.hpp"
 #include "mainWnd.h"
-extern HINSTANCE ghInstance;
+#include "spdlog/spdlog.h"
 
 #ifdef LOCAL_MODE
 const unsigned char resources[] = {0x00};
@@ -8,22 +9,57 @@ const unsigned char resources[] = {0x00};
 #include "resources.cpp"
 #endif
 
-#ifdef WIN32
-sciter::string GetAppPath()
-{
-	WCHAR path[PATH_MAX] = {0};
-	GetModuleFileNameW(NULL, path, PATH_MAX);
-	*wcsrchr(path, L'\\') = '\0';
-	return sciter::string(path);
-}
+#include <filesystem>
+
+#ifdef _WIN32
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
 #else
-sciter::string GetAppPath()
-{
-	sciter::string appPath = sciter::application::argv()[0];
-	std::size_t found = appPath.find_last_of(u"/");
-	return appPath.substr(0, found);
-}
+#include <unistd.h>
 #endif
+
+sciter::string GetExecutablePath() {
+    try {
+        std::filesystem::path execPath;
+
+#ifdef _WIN32
+        wchar_t path[MAX_PATH] = { 0 };
+        if (GetModuleFileNameW(NULL, path, MAX_PATH) == 0) {
+            throw std::runtime_error("Failed to get module filename");
+        }
+        execPath = path;
+
+#elif defined(__APPLE__)
+        char path[PATH_MAX];
+        uint32_t size = sizeof(path);
+        if (_NSGetExecutablePath(path, &size) != 0) {
+            throw std::runtime_error("Buffer too small");
+        }
+        char realPath[PATH_MAX];
+        if (!realpath(path, realPath)) {
+            throw std::runtime_error("Failed to resolve real path");
+        }
+        execPath = realPath;
+
+#else
+        char path[PATH_MAX];
+        ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+        if (count == -1) {
+            throw std::runtime_error("Failed to read symbolic link");
+        }
+        path[count] = '\0';
+        execPath = path;
+#endif
+
+        spdlog::info("Executable path: {}", execPath.string());
+        return sciter::string(execPath.parent_path().wstring());
+    }
+    catch (const std::exception& e) {
+        spdlog::error("Failed to get executable path: {}", e.what());
+        throw;
+    }
+}
 
 sciter::string Path2Url(LPCWSTR path)
 {
@@ -38,20 +74,16 @@ int uimain(std::function<int()> run)
 	UINT script_options = ALLOW_FILE_IO | ALLOW_SOCKET_IO | ALLOW_SYSINFO | SCITER_SET_SCRIPT_RUNTIME_FEATURES | ALLOW_EVAL;
 	SciterSetOption(nullptr, SCITER_SET_SCRIPT_RUNTIME_FEATURES, script_options);
 
-#ifdef DEBUG_WINDOW
-	// spdlog::set_level(spdlog::level::debug);
+#ifdef CONSOLE
+	spdlog::set_level(spdlog::level::debug);
+	spdlog::debug("debug mode");
 	sciter::debug_output_console console;
 	SciterSetOption(nullptr, SCITER_SET_DEBUG_MODE, TRUE);
-#endif
-#ifdef WIN32
-	HICON hIcon = ::LoadIcon(ghInstance, L"IDI_ICON_LOGO");
-#else
-	SciterSetOption(nullptr, SCITER_SET_GFX_LAYER, GFX_LAYER_SKIA);
 #endif
 
 	sciter::string appBaseUrl;
 #ifdef LOCAL_MODE
-	sciter::string strRoot = GetAppPath();
+	sciter::string strRoot = GetExecutablePath();
 	strRoot += L"/ui/main.htm";
 	appBaseUrl = Path2Url(strRoot.c_str());
 #else
@@ -62,16 +94,8 @@ int uimain(std::function<int()> run)
 	SciterSetGlobalAsset(pMainWnd);
 
 	pMainWnd->load(appBaseUrl.c_str());
-#ifndef _WIN32
-	// extern void initWindow(HWINDOW);
-	// initWindow(pMainWnd->get_hwnd());
-#endif
-	pMainWnd->expand();
-	int ret = run();
 
-#ifdef _WIN32
-	DestroyIcon(hIcon);
-#endif
+	int ret = run();
 
 	return ret;
 }

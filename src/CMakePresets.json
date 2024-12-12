@@ -1,0 +1,82 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "winbase",
+            "hidden": true,
+            "toolchainFile": "C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "generator": "Visual Studio 16 2019"
+        },
+        {
+            "name": "Win32",
+            "hidden": false,
+            "inherits": "winbase",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x86-windows",
+                "ARCH": "x32",
+                "SCITER_BIN": "bin/windows/x32"
+            },
+            "architecture": "Win32"
+        },
+        {
+            "name": "x64",
+            "hidden": false,
+            "inherits": "winbase",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "ARCH": "x64",
+                "SCITER_BIN": "bin/windows/x64"
+            },
+            "architecture": "x64"
+        },
+        {
+            "name": "osx",
+            "hidden": true,
+            "toolchainFile": "${sourceParentDir}/../vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-osx",
+                "ARCH": "osx",
+                "SCITER_BIN": "bin/osx"
+            }
+        },
+        {
+            "name": "Debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "LOCALMODE": true,
+                "DEBUG": true,
+                "CONSOLE": true
+            }
+        },
+        {
+            "name": "Release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "LOCALMODE": false,
+                "DEBUG": false
+            }
+        },
+        {
+            "name": "x32-Debug",
+            "inherits": ["Win32", "Debug"]
+        },
+        {
+            "name": "x32-Release",
+            "inherits": ["Win32", "Release"]
+        },
+        {
+            "name": "x64-Debug",
+            "inherits": ["x64", "Debug"]
+        },
+        {
+            "name": "x64-Release",
+            "inherits": ["x64", "Release"]
+        },
+        {
+            "name": "osx-Release",
+            "inherits": ["osx", "Release"]
+        }
+    ]
+}

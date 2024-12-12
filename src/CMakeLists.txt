@@ -1,46 +1,45 @@
 cmake_minimum_required(VERSION 3.20.0)
-project(sciter-starter VERSION 3.0)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OSX version" FORCE)
+project(n8photoslide VERSION 4.0)
 
 OPTION(LOCALMODE "loacal mode" ON)
-OPTION(DEBUGWINDOW "Debug Window" ON)
+OPTION(DEBUG "Debug" ON)
+OPTION(CONSOLE "console mode" OFF)
 OPTION(ARCH "target OS" "x32")
 
-SET(MYTARGET "sciterstarter")
-
-SET(VERSION_MAJOR 1)
-SET(VERSION_MINOR 0)
+SET(MYTARGET "n8photoslide")
+SET(VERSION_MAJOR 0)
+SET(VERSION_MINOR 1)
 SET(VERSION_3RD 0)
 
 if(LOCALMODE)
-    message("local mode")
     ADD_DEFINITIONS(-DLOCAL_MODE)
 endif()
-if(DEBUGWINDOW)
-    message("debug window")
-    ADD_DEFINITIONS(-DDEBUG_WINDOW)
-elseif(WIN32)
-    add_link_options(-mwindows)
+if(DEBUG)
+    ADD_DEFINITIONS(-D_DEBUG)
 endif()
-
-if(APPLE)
-    unset(CMAKE_OSX_ARCHITECTURES)
-    UNSET(CMAKE_SYSTEM_PROCESSOR)
-    UNSET(CMAKE_OSX_DEPLOYMENT_TARGET)
-    set(CMAKE_MACOSX_RPATH ON)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Architectures me" FORCE)
-    set(CMAKE_SYSTEM_PROCESSOR "x86_64" CACHE STRING "System Processor me" FORCE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OSX version" FORCE)
+if(CONSOLE)
+    ADD_DEFINITIONS(-DCONSOLE)
+    if(WIN32)
+        add_link_options(/SUBSYSTEM:CONSOLE /ENTRY:wWinMainCRTStartup)
+    endif()
 else()
-    add_link_options(-static -static-libgcc -static-libstdc++)
+    if(WIN32)
+        add_link_options(/SUBSYSTEM:WINDOWS)
+    endif()
 endif()
 
-file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/BN.txt VERSION_BUILD)
-message("building version: ${VERSION_BUILD}")
+ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 
-SET(VENDORS ${CMAKE_CURRENT_SOURCE_DIR}/../vendors/${ARCH})
-SET(CMAKE_PREFIX_PATH ${VENDORS};${VENDORS}/lib;${VENDORS}/../include;${CMAKE_PREFIX_PATH})
+SET(SCITER_DIR "C:/Users/george/Downloads/sciter-js-sdk-5.0.3.15")
+SET(CMAKE_PREFIX_PATH ${SCITER_DIR}/include;${SCITER_DIR}/${SCITER_BIN};${CMAKE_PREFIX_PATH})
 
-SET(CMAKE_CXX_STANDARD 14)
+find_package(spdlog CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+
+SET(LIBLIST spdlog::spdlog_header_only fmt::fmt-header-only)
+
+SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED True)
 
 SET(SRCLIST AppMain.cpp)
@@ -49,62 +48,43 @@ SET(SRCLIST AppMain.cpp)
 SET(TMPDLLLIST)
 
 IF(WIN32)
+    add_link_options(/MANIFEST:NO)
     ENABLE_LANGUAGE(RC)
     SET(RES_FILES "res/resource.rc")
-
-    find_file(TMPNAME name "sciter-win-main.cpp" NO_CACHE REQUIRED)
-    LIST(APPEND SRCLIST ${TMPNAME})
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    
+    find_file(TMPNAME2 name "sciter-win-main.cpp" NO_CACHE REQUIRED)
+    LIST(APPEND SRCLIST ${TMPNAME2})
 
     LIST(APPEND TMPDLLLIST "sciter.dll")
 ELSE()
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl")
+    SET(RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ui_res/images/n8ap.icns)
     find_file(TMPNAME name "sciter-osx-main.mm" NO_CACHE REQUIRED)
     LIST(APPEND SRCLIST ${TMPNAME})
 
     LIST(APPEND TMPDLLLIST "libsciter.dylib")
     LIST(APPEND LIBLIST "-framework Foundation" "-framework Cocoa" "-framework AppKit" "-framework CoreData")
+
 ENDIF()
 
-if(MINGW)
-    set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
-    set(CMAKE_MODULE_LINKER_FLAGS "-fuse-ld=lld")
-    set(CMAKE_SHARED_LINKER_FLAGS "-fuse-ld=lld")
-    add_compile_options(-w -DUNICODE -D_UNICODE)
-    add_link_options(-municode)
-endif()
 
-ADD_DEFINITIONS(-DUNICODE -D_GLIBCXX_USE_CXX11_ABI=0)
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/BN.txt VERSION_BUILD)
+message("building version: ${VERSION_BUILD}")
 configure_file(res/resource.h.in ${CMAKE_CURRENT_SOURCE_DIR}/res/resource.h)
 configure_file(res/info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/res/info.plist)
-include_directories( $<BUILD_INTERFACE:${VENDORS}/../include>)
-link_directories($<BUILD_INTERFACE:${VENDORS}/lib> $<BUILD_INTERFACE:${CMAKE_FIND_ROOT_PATH}/lib> )
+include_directories(${SCITER_DIR}/include)
 
+add_executable(${MYTARGET} ${SRCLIST} ${RES_FILES})
+target_link_libraries(${MYTARGET} PRIVATE ${LIBLIST}  )
+
+SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/../bin/${ARCH})
+CMAKE_PATH(NORMAL_PATH CMAKE_INSTALL_PREFIX)
+SET(RUNTIMEDIR ${CMAKE_INSTALL_PREFIX})
 if(APPLE)
-    set(MACOSX_BUNDLE_ICON_FILE n8ap.icns)
-    set(myApp_ICON ${CMAKE_CURRENT_SOURCE_DIR}/res/gallery.icns)
-    set_source_files_properties(${myApp_ICON} PROPERTIES  MACOSX_PACKAGE_LOCATION "Resources")
-
-    add_executable(${MYTARGET} MACOSX_BUNDLE ${myApp_ICON} ${SRCLIST})
-    set_target_properties(${MYTARGET} PROPERTIES
-        BUNDLE True
-        MACOSX_BUNDLE_GUI_IDENTIFIER com.moosephotoprint.${MYTARGET}
-        MACOSX_BUNDLE_BUNDLE_NAME ${MYTARGET}
-        MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_MAJOR}.${VERSION_Minor}.${VERSION_3RD}
-        MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_MAJOR}.${VERSION_Minor}.${VERSION_3RD}
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/res/Info.plist
-        XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "YES"
-    )
-else()
-    add_executable(${MYTARGET} ${SRCLIST} ${RES_FILES})
-endif()
-    
-target_link_libraries(${MYTARGET} ${LIBLIST}  )
-
-SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/../bin)
-SET(RUNTIMEDIR ${CMAKE_INSTALL_PREFIX}/${ARCH}-${MYTARGET})
-SET(DLLDIR ${CMAKE_INSTALL_PREFIX}/${ARCH}-${MYTARGET})
-if(APPLE)
-    SET(DLLDIR ${RUNTIMEDIR}/${MYTARGET}.app/Contents/MacOS)
+    SET(RUNTIMEDIR ${CMAKE_INSTALL_PREFIX}/${MYTARGET}.app/Contents/MacOS)
 endif()
 
 # get full file name and push into dlllist
@@ -115,41 +95,39 @@ foreach(tmp ${TMPDLLLIST})
     LIST(APPEND DLLLIST ${TMPFULL})
 endforeach()
 
-
-INSTALL(
-    TARGETS ${MYTARGET}
-    BUNDLE DESTINATION ${RUNTIMEDIR}
-    RUNTIME DESTINATION ${RUNTIMEDIR}
-    FRAMEWORK DESTINATION ${RUNTIMEDIR}
-)
-
-install(CODE "set(DLLLIST \"${DLLLIST}\")
-    set(DLLDIR \"${DLLDIR}\")
-    ")
-
-install(CODE [[
-    foreach(_file ${DLLLIST})
-        message("${_file}")
-        file(INSTALL
-        DESTINATION ${DLLDIR}
-        TYPE SHARED_LIBRARY
-        FOLLOW_SYMLINK_CHAIN
-        FILES "${_file}"
-        )
-    endforeach()
-]])
-
 if(APPLE)
-    install(CODE "
-        include(BundleUtilities)
-        fixup_bundle(\"${DLLDIR}/${MYTARGET}\" \"\" \"\")
-    ")
+    INSTALL(
+        TARGETS ${MYTARGET}
+        RUNTIME_DEPENDENCIES
+        BUNDLE DESTINATION .
+        RUNTIME DESTINATION .
+        FRAMEWORK DESTINATION .
+        LIBRARY DESTINATION .
+    )
+else()
+    INSTALL(
+        TARGETS ${MYTARGET}
+        RUNTIME DESTINATION .
+        FRAMEWORK DESTINATION .
+        LIBRARY DESTINATION .
+    )
 endif()
+
+INSTALL(PROGRAMS ${DLLLIST} DESTINATION ${RUNTIMEDIR} )
 
 if(LOCALMODE)
     INSTALL(
         DIRECTORY ui
-        DESTINATION ${DLLDIR}
+        DESTINATION ${RUNTIMEDIR}
         CONFIGURATIONS
     )
+endif()
+
+if(APPLE)
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${MYTARGET}.app")
+    install(CODE "include(BundleUtilities)
+        fixup_bundle(\"${APPS}\" \"\" \"${CMAKE_PREFIX_PATH}\")")
+
+    # set(CPACK_GENERATOR "DRAGNDROP")
+    # include(CPack)
 endif()

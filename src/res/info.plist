@@ -5,23 +5,23 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>sciterstarter</string>
+	<string>n8photoslide</string>
 	<key>CFBundleIconFile</key>
 	<string>gallery.icns</string>
 	<key>CFBundleIVersion</key>
-	<string>1.0.0</string>
+	<string>0.1.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>0.1.0</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.moosephotoprint.</string>
 	<key>CFBundleName</key>
-	<string>sciterstarter</string>
+	<string>n8photoslide</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>MOOSE</string>
 	<key>LSMinimumSystemVersion</key>
-	<string></string>
+	<string>10.15</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2023 Moose Photo Print Ltd.</string>
 	<key>NSMainNibFile</key>

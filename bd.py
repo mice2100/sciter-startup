@@ -12,7 +12,6 @@ parse = argparse.ArgumentParser()
 parse.add_argument("-os", default=defos, dest="os", choices=["x32", "x64", "osx"])
 parse.add_argument("-build", default="Release", dest="build", choices=["Debug", "Release"])
 parse.add_argument("-step", default="all", dest="step", choices=["cmake", "build", "all"])
-parse.add_argument("-company", default="nemo", dest="company", choices=["nemo", "mpp"])
 
 # Increase build number
 BNFILE = "./src/BN.txt"
@@ -30,38 +29,14 @@ if not os.path.isdir(buildpath):
     os.mkdir(buildpath)
 
 if args.step=='all' or args.step=='cmake':
-    if args.os=='x32' or args.os=='x64':
-        envpaths = os.environ.get('path').lower().split(';')
-        vcpkgpath = 'c:/vcpkg'
-        
-    if args.os=='x32':
-        triplet = 'x86-clang-static'
-        envpathsN = [i for i in envpaths if not i.startswith('c:\\msys64\\')]
-        envpathsN.append('c:\\msys64\\clang32\\bin')
-        os.environ['path'] = ';'.join(envpathsN)
-    elif args.os=='x64':
-        triplet = 'x64-clang-static'
-        envpathsN = [i for i in envpaths if not i.startswith('c:\\msys64\\')]
-        envpathsN.append('c:\\msys64\\clang64\\bin')
-        os.environ['path'] = ';'.join(envpathsN)
-    else:
-        vcpkgpath = '/Users/zhijunlou/Documents/code/vcpkg'
-        triplet = 'x64-osx-release'
+    preset = f'{args.os}-{args.build}'
+    buildopts = f'cmake --preset {preset} -S {srcfolder} -B {buildpath}'
 
-    buildopts = f'cmake --toolchain {vcpkgpath}/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_TRIPLETS=./triplets -DVCPKG_TARGET_TRIPLET={triplet} -G Ninja'
-    buildargs = f' -S {srcfolder} -B {buildpath}'
+    cmds = buildopts
 
-    buildopts += f' -DARCH={args.os}'
-
-    if args.build=="Debug":
-        buildopts += ' -DLOCALMODE=ON -DDEBUGWINDOW=ON'
-    else:
-        buildopts += ' -DLOCALMODE=OFF -DDEBUGWINDOW=OFF'
-
-    cmds = buildopts+buildargs 
-
+    print(cmds)
     os.system(cmds)
 
 if args.step=='all' or args.step=='build':
-    cmds = f'cmake --build {buildpath} -t install'
+    cmds = f'cmake --build {buildpath} --config {args.build} -t install'
     os.system(cmds)

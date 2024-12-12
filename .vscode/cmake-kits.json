@@ -1,9 +1,0 @@
-[
-  {
-    "name": "vcpkg",
-    "toolchainFile": "c:/vcpkg/vcpkg/scripts/buildsystems/vcpkg.cmake",
-    "preferredGenerator": {
-      "name": "Ninja"
-    }
-  }
-]

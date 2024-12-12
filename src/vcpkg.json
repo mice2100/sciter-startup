@@ -1,0 +1,8 @@
+{
+    "name": "n8photoslide",
+    "version": "1.0.0",
+    "dependencies": [
+        { "name": "spdlog" },
+        { "name": "fmt" }
+    ]
+}

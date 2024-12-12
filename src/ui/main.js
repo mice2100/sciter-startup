@@ -1,4 +1,5 @@
 document.on("ready", function() {
+	Window.this.state = Window.WINDOW_SHOWN;
     console.log("I'm ready now.");
     let prog = document.createElement('progress');
 	document.body.appendChild(prog);
