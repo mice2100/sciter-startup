@@ -19,47 +19,22 @@ const unsigned char resources[] = {0x00};
 #include <unistd.h>
 #endif
 
-sciter::string GetExecutablePath() {
-    try {
-        std::filesystem::path execPath;
-
-#ifdef _WIN32
-        wchar_t path[MAX_PATH] = { 0 };
-        if (GetModuleFileNameW(NULL, path, MAX_PATH) == 0) {
-            throw std::runtime_error("Failed to get module filename");
-        }
-        execPath = path;
-
-#elif defined(__APPLE__)
-        char path[PATH_MAX];
-        uint32_t size = sizeof(path);
-        if (_NSGetExecutablePath(path, &size) != 0) {
-            throw std::runtime_error("Buffer too small");
-        }
-        char realPath[PATH_MAX];
-        if (!realpath(path, realPath)) {
-            throw std::runtime_error("Failed to resolve real path");
-        }
-        execPath = realPath;
-
+#ifdef WIN32
+	sciter::string GetAppPath()
+	{
+		WCHAR path[_MAX_PATH] = {0};
+		GetModuleFileNameW(NULL, path, _MAX_PATH);
+		*wcsrchr(path, L'\\') = '\0';
+		return sciter::string(path);
+	}
 #else
-        char path[PATH_MAX];
-        ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
-        if (count == -1) {
-            throw std::runtime_error("Failed to read symbolic link");
-        }
-        path[count] = '\0';
-        execPath = path;
+	sciter::string GetAppPath()
+	{
+		sciter::string appPath = sciter::application::argv()[0];
+		std::size_t found = appPath.find_last_of(u"/");
+		return appPath.substr(0, found);
+	}
 #endif
-
-        spdlog::info("Executable path: {}", execPath.string());
-        return sciter::string(execPath.parent_path().wstring());
-    }
-    catch (const std::exception& e) {
-        spdlog::error("Failed to get executable path: {}", e.what());
-        throw;
-    }
-}
 
 sciter::string Path2Url(LPCWSTR path)
 {
@@ -83,12 +58,12 @@ int uimain(std::function<int()> run)
 
 	sciter::string appBaseUrl;
 #ifdef LOCAL_MODE
-	sciter::string strRoot = GetExecutablePath();
-	strRoot += L"/ui/main.htm";
+	sciter::string strRoot = GetAppPath();
+	strRoot += WSTR("/ui/main.htm");
 	appBaseUrl = Path2Url(strRoot.c_str());
 #else
 	sciter::archive::instance().open(aux::elements_of(resources));
-	appBaseUrl = sciter::string(L"this://app/main.htm");
+	appBaseUrl = WSTR("this://app/main.htm");
 #endif
 	sciter::om::hasset<mainWnd> pMainWnd = new mainWnd();
 	SciterSetGlobalAsset(pMainWnd);

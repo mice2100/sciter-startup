@@ -32,11 +32,12 @@
         {
             "name": "osx",
             "hidden": true,
-            "toolchainFile": "${sourceParentDir}/../vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "toolchainFile": "~/vcpkg/scripts/buildsystems/vcpkg.cmake",
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": "x64-osx",
                 "ARCH": "osx",
-                "SCITER_BIN": "bin/osx"
+                "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64",
+                "SCITER_BIN": "bin/macosx"
             }
         },
         {

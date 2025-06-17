@@ -1,3 +1,6 @@
 build*
 bin
 vendors
+src/res/resource.h
+src/res/info.plist
+src/resources.cpp

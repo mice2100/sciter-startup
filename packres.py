@@ -1,12 +1,11 @@
 from sys import platform
 import os
 
+sciter_path = os.path.join(os.path.expanduser('~'), 'Downloads', 'sciter-js-sdk-5.0.3.21')
 if platform=='darwin':
-    scapp = 'vendors/osx/scapp'
-    packutil = 'vendors/osx/packfolder'
+    packutil = os.path.join(sciter_path, 'bin', 'macosx', 'packfolder')
 else:
-    scapp = 'C:\\Users\\george\\Downloads\\sciter-js-sdk-5.0.3.15\\bin\\windows\\x32\\scapp.exe'
-    packutil = 'C:\\Users\\george\\Downloads\\sciter-js-sdk-5.0.3.15\\bin\\windows\\packfolder.exe'
+    packutil = os.path.join(sciter_path, 'bin', 'windows', 'packfolder.exe')
 
 os.system(f'{packutil} src/ui src/resources.cpp')
 
