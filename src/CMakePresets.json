@@ -14,6 +14,7 @@
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": "x86-windows",
                 "ARCH": "x32",
+                "SCITER_DIR": "C:/Users/george/Downloads/sciter-js-sdk-5.0.3.21",
                 "SCITER_BIN": "bin/windows/x32"
             },
             "architecture": "Win32"
@@ -37,7 +38,8 @@
                 "VCPKG_TARGET_TRIPLET": "x64-osx",
                 "ARCH": "osx",
                 "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64",
-                "SCITER_BIN": "bin/macosx"
+                "SCITER_BIN": "bin/macosx",
+                "SCITER_DIR": "~/Downloads/sciter-js-sdk-5.0.3.21"
             }
         },
         {

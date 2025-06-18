@@ -30,7 +30,7 @@ option(ARCH "Target architecture" "x32")
 # Version information
 set(VERSION_MAJOR 2)
 set(VERSION_MINOR 1)
-set(VERSION_3RD 0)
+set(VERSION_3RD 1)
 file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/BN.txt VERSION_BUILD)
 message(STATUS "Building version: ${VERSION_BUILD}")
 
@@ -52,8 +52,7 @@ elseif(WIN32)
 endif()
 
 # Dependencies
-set(SCITER_DIR "~/Downloads/sciter-js-sdk-5.0.3.11")
-set(CMAKE_PREFIX_PATH ${SCITER_DIR}/include;${SCITER_DIR}/${SCITER_BIN};${CMAKE_PREFIX_PATH})
+list(APPEND CMAKE_PREFIX_PATH "${SCITER_DIR}/include" "${SCITER_DIR}/${SCITER_BIN}")
 
 find_package(spdlog CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
@@ -66,7 +65,7 @@ if(WIN32)
     list(APPEND SRCLIST "res/resource.rc")
     find_file(WIN_MAIN "sciter-win-main.cpp" NO_CACHE REQUIRED)
     list(APPEND SRCLIST ${WIN_MAIN})
-    find_library(SCITER_LIBRARY sciter REQUIRED)
+    find_file(SCITER_LIBRARY sciter NAMES sciter.dll REQUIRED)
 else()
     find_file(OSX_MAIN "sciter-osx-main.mm" NO_CACHE REQUIRED)
     list(APPEND SRCLIST ${OSX_MAIN})
